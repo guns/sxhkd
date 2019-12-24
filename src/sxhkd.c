@@ -206,13 +206,18 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
 	uint16_t modfield = 0;
 	uint16_t lockfield = num_lock | caps_lock | scroll_lock;
 	parse_event(evt, event_type, &keysym, &button, &modfield);
+	bool num_lock_on = (modfield & num_lock) != 0;
 	modfield &= ~lockfield & MOD_STATE_FIELD;
-	if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
-		hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event);
-		if (hk != NULL) {
-			run(hk->command, hk->sync);
-			put_status(COMMAND_PREFIX, hk->command);
+	if (num_lock_on) {
+		if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
+			hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event);
+			if (hk != NULL) {
+				run(hk->command, hk->sync);
+				put_status(COMMAND_PREFIX, hk->command);
+			}
 		}
+	} else {
+		replay_event = true;
 	}
 	switch (event_type) {
 		case XCB_BUTTON_PRESS:

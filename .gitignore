@@ -1,3 +1,5 @@
 *.o
 sxhkd
 tags
+/pkg/
+/*.pkg*
